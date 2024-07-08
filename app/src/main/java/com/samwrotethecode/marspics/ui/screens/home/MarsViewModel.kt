@@ -17,8 +17,8 @@ import java.io.IOException
 
 sealed interface MarsUiState {
     data class Success(val marsPics: List<MarsPics>) : MarsUiState
-    object Error : MarsUiState
-    object Loading : MarsUiState
+    data object Error : MarsUiState
+    data object Loading : MarsUiState
 }
 
 class MarsViewModel(private val marsPicsRepository: MarsPicsRepository) : ViewModel() {
@@ -29,18 +29,18 @@ class MarsViewModel(private val marsPicsRepository: MarsPicsRepository) : ViewMo
         getMarsPics()
     }
 
-    private fun getMarsPics() {
+    private fun getMarsPics() = viewModelScope.launch {
         try {
-            viewModelScope.launch {
-                val pics = marsPicsRepository.getMarsPics()
-                _uiState.update { MarsUiState.Success(pics) }
-            }
+            val pics = marsPicsRepository.getMarsPics()
+            _uiState.update { MarsUiState.Success(pics) }
         } catch (e: IOException) {
             _uiState.update { MarsUiState.Error }
         }
     }
 
+
     fun retry() {
+        _uiState.update { MarsUiState.Loading }
         getMarsPics()
     }
 
