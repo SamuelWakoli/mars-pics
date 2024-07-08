@@ -1,5 +1,7 @@
 package com.samwrotethecode.marspics.ui.screens.home
 
+import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,10 +29,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.samwrotethecode.marspics.domain.MarsPics
+import com.samwrotethecode.marspics.utils.openImgIntent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,6 +104,7 @@ fun PicsPage(
     modifier: Modifier = Modifier,
     pics: List<MarsPics>
 ) {
+    val context = LocalContext.current
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Adaptive(260.dp),
         contentPadding = PaddingValues(
@@ -118,7 +123,15 @@ fun PicsPage(
                 AsyncImage(
                     model = pic.imgSrc,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            openImgIntent(url = pic.imgSrc, context = context, onError = { e ->
+                                Toast
+                                    .makeText(context, e.message, Toast.LENGTH_SHORT)
+                                    .show()
+                            })
+                        },
                     contentScale = ContentScale.Crop,
                 )
             }
